@@ -33,7 +33,7 @@ int main() {
 
 
     //guardando los observables
-    std::ofstream traj("trayectoria2Dring.dat"); // Lo mismo que ya teniamos
+    std::ofstream traj("trayectoria2Dring.xyz"); // Lo mismo que ya teniamos
     std::ofstream obs("observables2Dring.dat"); // Cambio para obtener y pintar los observables
 
     // encabezado para el archivo de observables
@@ -46,7 +46,6 @@ int main() {
         velocityVerlet2D(particles, dt);
 
         // Trayectoria partículas
-        traj << "\n";
         traj << particles.size() <<"\n";
         traj << "#t = " << t << "\n";
 
