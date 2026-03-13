@@ -26,12 +26,16 @@ void velocityVerlet3D(std::vector<Particle3D> &particles,
                         double xmin, double xmax,
                         double ymin, double ymax,
                         double zmin, double zmax,
-                        bool useBoundaries);
+                        bool useBoundaries, bool usePBounds,double Lx, double Ly,double Lz);
 
 //funciones pertinenetes a las condiciones de frontera periodicas
 void applyReflectiveBC3D(std::vector<Particle3D>& particles,
                          double xmin, double xmax,
                          double ymin, double ymax,
                          double zmin, double zmax);
+
+//Condiciones periódicas
+void applyPeriodicBoundary(std::vector<Particle3D>& particles,
+                           double Lx, double Ly, double Lz);
 //std::vec..bla bla bla es el sistema de N partículas, & se pasa por ref no se copia memoria Estos es la interfaz del integrador
 #endif

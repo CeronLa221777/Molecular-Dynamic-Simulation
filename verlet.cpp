@@ -60,7 +60,7 @@ void velocityVerlet3D(std::vector<Particle3D>& particles, double dt,
                         const std::vector<double>& k, double xmin, double xmax,
                                   double ymin, double ymax,
                                   double zmin, double zmax,
-                                bool useBoundaries)
+                                bool useBoundaries, bool usePBounds,double Lx, double Ly,double Lz)
 {
     int N = particles.size();
     std::vector<double> acc_x(N, 0.0);
@@ -83,7 +83,13 @@ void velocityVerlet3D(std::vector<Particle3D>& particles, double dt,
     if (useBoundaries){
     applyReflectiveBC3D(particles, xmin, xmax, ymin, ymax, zmin, zmax);     //Checkeamos condicion: agregar condiciones de frontera
     }
+    if (usePBounds){
+      applyPeriodicBoundary(particles,Lx, Ly,Lz);  //Function periodic boundaries 
+    }
     
+
+
+
     computeAccelerations3D(particles, acc_x, acc_y, acc_z, k);         //Calculamos la aceleración con la nueva configuración de posiciones
     for(int i = 0; i < N; i++){
         particles[i].vx += 0.5 * acc_x[i] * dt;                 //Nueva velocidad de la partícula
@@ -130,5 +136,30 @@ void applyReflectiveBC3D(std::vector<Particle3D>& particles,
             p.vz = -p.vz;
         }
 
+    }
+}
+
+
+
+
+void applyPeriodicBoundary(std::vector<Particle3D>& particles,
+                           double Lx, double Ly, double Lz)
+{
+    for (auto& p : particles) {
+
+        if (p.x >= Lx)
+            p.x -= Lx;
+        else if (p.x < 0.0)
+            p.x += Lx;
+
+        if (p.y >= Ly)
+            p.y -= Ly;
+        else if (p.y < 0.0)
+            p.y += Ly;
+
+        if (p.z >= Lz)
+            p.z -= Lz;
+        else if (p.z < 0.0)
+            p.z += Lz;
     }
 }
