@@ -17,7 +17,9 @@ void computeAccelerations3D(const std::vector<Particle3D>& particles,
                             std::vector<double>& acc_x,
                             std::vector<double>& acc_y,
                             std::vector<double>& acc_z,
-                            const std::vector<double>& k);
+                            const std::vector<double>& k,
+                            bool usePBounds,
+                            double Lx, double Ly, double Lz);
 
 //definicion de función para el algoritmo velocity verlet
 void velocityVerlet3D(std::vector<Particle3D> &particles,
@@ -38,4 +40,13 @@ void applyReflectiveBC3D(std::vector<Particle3D>& particles,
 void applyPeriodicBoundary(std::vector<Particle3D>& particles,
                            double Lx, double Ly, double Lz);
 //std::vec..bla bla bla es el sistema de N partículas, & se pasa por ref no se copia memoria Estos es la interfaz del integrador
+//Ciudar las condiciones iniciales para que no se sobrepongan las partículas
+bool tooClose(const std::vector<Particle3D>& particles,
+              double x, double y, double z,
+              int current,
+              double minDist,
+              bool usePBounds,
+              double Lx, double Ly, double Lz);
+
+
 #endif

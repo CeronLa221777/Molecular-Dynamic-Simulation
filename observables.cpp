@@ -15,29 +15,48 @@ double kineticEnergy3D(const std::vector<Particle3D>& particles)
     return K;
 }
 
-double potentialEnergy3D(const std::vector<Particle3D>& particles,const std::vector<double>& k)
+double potentialEnergy3D(const std::vector<Particle3D>& particles,
+                         const std::vector<double>& k,
+                         bool usePBounds,
+                         double Lx, double Ly, double Lz)
 {
     double U = 0.0;
     int N = particles.size();
+
     double kx = k[0];
     double ky = k[1];
-    double kz = k[3];
+    double kz = k[2];
+
+    double rcut2 = RCUT2;
 
     // Energía de la trampa armónica
     for(const auto& p : particles){
-        U += 0.5 * (kx * p.x * p.x + ky * p.y * p.y + kz * p.z * p.z);
+        U += 0.5 * (kx*p.x*p.x + ky*p.y*p.y + kz*p.z*p.z);
     }
-    // Energía por interacción de pares (soft-core)
+
+    // Energía de interacción por pares
     for(int i = 0; i < N; i++){
-        for(int j = i+1; j < N; j++){
+        for(int j = i + 1; j < N; j++){
+
             double dx = particles[i].x - particles[j].x;
             double dy = particles[i].y - particles[j].y;
             double dz = particles[i].z - particles[j].z;
+
+            // minimum image
+            if(usePBounds){
+                dx -= Lx * std::round(dx / Lx);
+                dy -= Ly * std::round(dy / Ly);
+                dz -= Lz * std::round(dz / Lz);
+            }
+
             double r2 = dx*dx + dy*dy + dz*dz;
-            double rcut2 = RCUT2; // mismo corte que en aceleraciones
+
             if(r2 < rcut2){
-                double r6 = r2 * r2 * r2;
-                U += 1.0 / (r6 * r6); // energía potencial de pares
+
+                double r6 = r2*r2*r2;
+                double r12 = r6*r6;
+
+                U += 1.0 / r12;
             }
         }
     }

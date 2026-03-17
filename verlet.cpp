@@ -9,45 +9,57 @@ void computeAccelerations3D(const std::vector<Particle3D>& particles,
                             std::vector<double>& acc_x,
                             std::vector<double>& acc_y,
                             std::vector<double>& acc_z,
-                            const std::vector<double>& k) //Nos toca calcular por aparte las aceleraciones para no todo meterlo en el verlet
-{
-
-    int N = particles.size();
+                            const std::vector<double>& k,
+                            bool usePBounds,
+                            double Lx, double Ly, double Lz)
+{   int N = particles.size();
     double rcut2 = RCUT2;
+
     double kx = k[0];
     double ky = k[1];
-    double kz = k[3];
-    // Trampa armónica
+    double kz = k[2];
 
     std::fill(acc_x.begin(), acc_x.end(), 0.0);
     std::fill(acc_y.begin(), acc_y.end(), 0.0);
     std::fill(acc_z.begin(), acc_z.end(), 0.0);
 
+    // Trampa armónica
     for(int i = 0; i < N; i++){
-        acc_x[i] = -kx*particles[i].x;
-        acc_y[i] = -ky*particles[i].y;
-        acc_z[i] = -kz*particles[i].z;
+        acc_x[i] = -kx * particles[i].x;
+        acc_y[i] = -ky * particles[i].y;
+        acc_z[i] = -kz * particles[i].z;
     }
-    // Interacción por pares (soft-core)
-    for(int i = 0; i < N; i++){
-        for(int j = i+1; j < N; j++){
 
-            double dx = particles[i].x - particles[j].x; // Vector relativo
-            double dy = particles[i].y - particles[j].y; 
+    // Interacción por pares
+    for(int i = 0; i < N; i++){
+        for(int j = i + 1; j < N; j++){
+
+            double dx = particles[i].x - particles[j].x;
+            double dy = particles[i].y - particles[j].y;
             double dz = particles[i].z - particles[j].z;
-            double r2 = dx*dx + dy*dy + dz*dz; // Norma cuadrado del vector relativo
-            
+
+            // minimum image convention
+            if(usePBounds){
+                dx -= Lx * std::round(dx / Lx);
+                dy -= Ly * std::round(dy / Ly);
+                dz -= Lz * std::round(dz / Lz);
+            }
+
+            double r2 = dx*dx + dy*dy + dz*dz;
+
             if (r2 < rcut2){
-                double r4 = r2 * r2;
-                double r6 = r4 * r2;
-                double r14 = r6 * r6 *r2;
-                double f_scalar = 12.0  / r14; // soft-core luego de la derivada da elevado a la 14
-                                
-                acc_x[i] += f_scalar*dx;// fuerza que ejerce j sobre i
+
+                double r4 = r2*r2;
+                double r6 = r4*r2;
+                double r14 = r6*r6*r2;
+
+                double f_scalar = 12.0 / r14;
+
+                acc_x[i] += f_scalar*dx;
                 acc_y[i] += f_scalar*dy;
                 acc_z[i] += f_scalar*dz;
 
-                acc_x[j] -= f_scalar*dx;// línea que hace que no tengamos cálculos duplicados, fuerza que recibe j de i por tecera ley de newton
+                acc_x[j] -= f_scalar*dx;
                 acc_y[j] -= f_scalar*dy;
                 acc_z[j] -= f_scalar*dz;
             }
@@ -67,7 +79,7 @@ void velocityVerlet3D(std::vector<Particle3D>& particles, double dt,
     std::vector<double> acc_y(N, 0.0);
     std::vector<double> acc_z(N, 0.0);
 
-    computeAccelerations3D(particles, acc_x, acc_y, acc_z, k);         //Calculamos aceleración en configuración "inicial"
+    computeAccelerations3D(particles, acc_x, acc_y, acc_z, k, usePBounds,Lx,Ly,Lz);         //Calculamos aceleración en configuración "inicial"
     for(int i = 0; i < N; i++){
         //velocidades en x,y,z
         particles[i].vx += 0.5 * acc_x[i] * dt;                 //Actualizamos velocidades medio paso
@@ -90,7 +102,7 @@ void velocityVerlet3D(std::vector<Particle3D>& particles, double dt,
 
 
 
-    computeAccelerations3D(particles, acc_x, acc_y, acc_z, k);         //Calculamos la aceleración con la nueva configuración de posiciones
+    computeAccelerations3D(particles, acc_x, acc_y, acc_z, k, usePBounds,Lx,Ly,Lz);         //Calculamos la aceleración con la nueva configuración de posiciones
     for(int i = 0; i < N; i++){
         particles[i].vx += 0.5 * acc_x[i] * dt;                 //Nueva velocidad de la partícula
         particles[i].vy += 0.5 * acc_y[i] * dt;
@@ -162,4 +174,36 @@ void applyPeriodicBoundary(std::vector<Particle3D>& particles,
         else if (p.z < 0.0)
             p.z += Lz;
     }
+}
+//Distribución condiciones iniciales
+
+
+bool tooClose(const std::vector<Particle3D>& particles,
+              double x, double y, double z,
+              int current,
+              double minDist,
+              bool usePBounds,
+              double Lx, double Ly, double Lz)
+{
+    double minDist2 = minDist * minDist;
+
+    for(int j = 0; j < current; j++){
+
+        double dx = x - particles[j].x;
+        double dy = y - particles[j].y;
+        double dz = z - particles[j].z;
+
+        if(usePBounds){
+            dx -= Lx * std::round(dx / Lx);
+            dy -= Ly * std::round(dy / Ly);
+            dz -= Lz * std::round(dz / Lz);
+        }
+
+        double r2 = dx*dx + dy*dy + dz*dz;
+
+        if(r2 < minDist2)
+            return true;
+    }
+
+    return false;
 }
