@@ -17,7 +17,9 @@ void computeAccelerations3D(const std::vector<Particle3D>& particles,
                             std::vector<double>& acc_x,
                             std::vector<double>& acc_y,
                             std::vector<double>& acc_z,
-                            const std::vector<double>& k);
+                            const std::vector<double>& k,
+                            bool usePBounds,
+                            double Lx, double Ly, double Lz);
 
 //definicion de función para el algoritmo velocity verlet
 void velocityVerlet3D(std::vector<Particle3D> &particles,
@@ -42,7 +44,9 @@ void applyPeriodicBoundary(std::vector<Particle3D>& particles,
 bool tooClose(const std::vector<Particle3D>& particles,
               double x, double y, double z,
               int current,
-              double minDist);
+              double minDist,
+              bool usePBounds,
+              double Lx, double Ly, double Lz);
 
 
 #endif
