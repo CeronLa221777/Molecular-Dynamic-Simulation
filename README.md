@@ -22,7 +22,7 @@ A versatile, from-scratch Molecular Dynamics engine written in C++17. This proje
 
 This project utilizes the `<filesystem>` library for file management, requiring a compiler that supports **C++17** or higher.
 
-**To compile (Linux/macOS/Windows MinGW):**
+**To compile (Linux):**
 ```bash
 g++ -O3 simulation3D.cpp verlet.cpp observables.cpp -o sim
 ```
@@ -30,10 +30,9 @@ g++ -O3 simulation3D.cpp verlet.cpp observables.cpp -o sim
 ## To run:
 ```bash
 ./sim     # On Linux/macOS
-sim.exe   # On Windows
 ```
 
 ## 📊 Data Visualization
-The repository includes Python scripts utilizing `<numpy>` and `<matplotlib>` to parse the output `<.dat>` files and generate production-ready plots of the system's thermodynamic evolution.
+The repository includes Python scripts utilizing `numpy` and `matplotlib` to parse the output `.dat` files and generate production-ready plots of the system's thermodynamic evolution.
 
-The visualization scripts automatically detect the ensemble type (NVE vs NVT) from the C++ generated filename and adjust titles and axis limits accordingly. All generated graphs are saved directly to the `<results/>` folder.
+The visualization scripts automatically detect the ensemble type (NVE vs NVT) from the C++ generated filename and adjust titles and axis limits accordingly. All generated graphs are saved directly to the `results/` folder.
