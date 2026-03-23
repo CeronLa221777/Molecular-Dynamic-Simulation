@@ -5,19 +5,32 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import os
 
-t, K, U, E = np.loadtxt("results/obs_3D_UNI_N750_rho0.050RAD_v1.0_pert_period.dat", delimiter=" ", skiprows=1, unpack = True)
+base_name = "obs_3D_UNI_N25_rho0.050RAD_v1.0_pert_period"
+input_path = f"results/{base_name}.dat"
+output_path = f"results/{base_name}.png"
 
-plt.figure(figsize=(10, 6))
-plt.plot(t, K, label=f'K(t)')
-plt.plot(t, U, label=f'U(t)')
-plt.plot(t, E, label=f'E(t)')
 
-plt.xlabel('Time (t)')
-plt.ylabel('Energy')
-plt.title('Evolution of the System Observables')
-plt.legend()
-plt.grid(True)
-plt.savefig(f"observables2DPTchaos.png", dpi=300, bbox_inches='tight')
+t, K, U, E, T = np.loadtxt(input_path, delimiter=" ", skiprows=1, unpack = True)
+
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (10, 8), sharex = True)
+
+ax1.plot(t, K, label=f'K/N (Kinetic per particle)')
+ax1.plot(t, U, label=f'U/N (Potential per particle)')
+ax1.plot(t, E, label=f'E/N (Total per particle)')
+ax1.set_xlabel('Time (t)')
+ax1.set_ylabel('Energy per particle')
+ax1.set_title('Evolution of the System Observables')
+ax1.legend()
+ax1.grid(True)
+
+ax2.plot(t, T, label='Temperature (T)', color = "purple")
+ax2.set_xlabel('Time (t)')
+ax2.set_ylabel('Temperature')
+ax2.set_title('Temperature over time')
+ax2.legend()
+ax2.grid(True)
+
+plt.savefig(output_path, dpi=300, bbox_inches='tight')
 plt.show()
 
 
