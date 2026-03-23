@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import os
 
-t, K, U, E = np.loadtxt("observables2DPTchaos.dat", delimiter=" ", skiprows=1, unpack = True)
+t, K, U, E = np.loadtxt("results/obs_3D_UNI_N750_rho0.050RAD_v1.0_pert_period.dat", delimiter=" ", skiprows=1, unpack = True)
 
 plt.figure(figsize=(10, 6))
 plt.plot(t, K, label=f'K(t)')
