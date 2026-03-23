@@ -17,12 +17,12 @@ enum class Placement {Sphere, Uniform}; // Clase para las posiciones posibles de
 
 int main() {
     constexpr double PI = 3.14159265358979323846;
-    int N = 25;
-    double rho = 0.05;                     // número de partículas
+    int N = 200;                     // número de partículas
+    double rho = 0.05;              // densidad del sistema
     double v_initial = 1.0;         // velocidad inicial
     
     // === definicion condiciones basicas del sistema ===
-    Dimension sim_dim = Dimension::D3;  //escogemos la dimension del sistema poniendo D1, D2, D3
+    Dimension sim_dim = Dimension::D3;  // escogemos la dimension del sistema poniendo D1, D2, D3
     Placement placement = Placement::Uniform; //escogemos si las particulas se distribuyen de forma uniforme o en una "esfera"
 
     // Switches para elegir condiones del sistema
@@ -30,6 +30,11 @@ int main() {
     bool perturbation = true;        // perturbación en posiciones
     bool periodicB =true;
     bool reflectiveB= false;
+
+    //switches para encender termostato de andersen
+    bool use_thermostat = true;     // true: ensamble NVT / false: ensamble NVE
+    double T_target = 1.0;          // Temperatura objetivo del baño térmico
+    double nu = 10.0;               // Frecuencia de colisión con el baño (probabilidad)
 
     // =========================================================================
     // STEP 1: CREACION DE LA CAJA DINAMICA DEPENDIENTE DE N Y RHO
@@ -250,10 +255,12 @@ int main() {
 
     // Dimensionalidad
     switch (sim_dim){
-    case Dimension::D1: ss << "1D_"; break;
-    case Dimension::D2: ss << "2D_"; break;
-    case Dimension::D3: ss << "3D_"; break;
+        case Dimension::D1: ss << "1D_"; break;
+        case Dimension::D2: ss << "2D_"; break;
+        case Dimension::D3: ss << "3D_"; break;
     }
+
+    ss << (use_thermostat ? "NVT_" : "NVE_");
 
     //tipo de distribucion
     ss << (placement == Placement::Uniform ? "UNI_" : "SPHERE_");
@@ -295,6 +302,15 @@ int main() {
         double t = i * dt;
 
         velocityVerlet3D(particles, dt, k_harmonic, x_min, x_max, y_min, y_max, z_min, z_max, reflectiveB, periodicB, Lx,Ly,Lz);
+
+        //aplicar el termostato si el sistema esta en NVT
+        if (use_thermostat) {
+            int current_dim = 3;
+            if (sim_dim == Dimension::D1) current_dim = 1;
+            else if (sim_dim == Dimension::D2) current_dim = 2;
+            
+            applyAndersenThermostat(particles, T_target, nu, dt, current_dim, gen);
+        }
 
         // Trayectoria partículas
         traj << particles.size() <<"\n";
