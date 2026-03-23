@@ -29,7 +29,7 @@ make
 
 ## To run:
 ```bash
-./sim3D     # On Linux/macOS
+./sim3D.x     # On Linux/macOS
 ```
 
 ## 📊 Data Visualization
